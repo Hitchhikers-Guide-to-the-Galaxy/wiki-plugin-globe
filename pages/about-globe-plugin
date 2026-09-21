@@ -1,0 +1,138 @@
+{
+  "title": "About Globe Plugin",
+  "story": [
+    {
+      "type": "markdown",
+      "id": "93e26dbbd5e5c626",
+      "text": "The Globe plugin draws a globe from pins the wiki already holds \u2014 the pins of Map items, the points of a GeoJSON file, and pins typed into the item itself. Whatever it shows it offers back to the page, so a Map item can gather and freeze it. The globe and its libraries ship inside the plugin, so it draws with no network."
+    },
+    {
+      "type": "globe",
+      "id": "ea14d6e4c4603334",
+      "text": "LAYER Two Cities\n51.5074, -0.1278 London\n52.52, 13.405 Berlin\nTwo pins typed into the item. Double-click this caption to edit."
+    },
+    {
+      "type": "markdown",
+      "id": "103489f37ac838c7",
+      "text": "# Item Text\nA command is an UPPERCASE first word, as in the Map plugin. Any other line is a caption."
+    },
+    {
+      "type": "table",
+      "id": "c1ffb4d41fd07ed9",
+      "text": "CAPTION What a Globe item understands\n\n| Line | Does |\n|---|---|\n| PAGE | Gathers the pins of the other Map and Globe items on this page |\n| LINEUP | Gathers the pins of every such item to the left in the lineup |\n| SOURCE /assets/page-slug/file.geojson | Draws the points of a GeoJSON file; a path beginning / is read from the site the page came from |\n| 51.5, -0.1 Label with a [[Link]] | A pin typed here, spelled exactly as the Map plugin spells it |\n| LAYER Name | Names and colours the lines that follow, until the next LAYER |"
+    },
+    {
+      "type": "markdown",
+      "id": "40737118b4de8f5e",
+      "text": "KIND, TEXTURE and VIEW are planned. The item recognises them, draws nothing for them, and says so beneath the globe. A mistyped command is reported the same way, with a suggestion."
+    },
+    {
+      "type": "markdown",
+      "id": "7359e7da8566abca",
+      "text": "# Points Only\nVersion 0.1 draws points. Lines and areas in a file are counted and left out, and the item says how many."
+    },
+    {
+      "type": "markdown",
+      "id": "58c4a01eb214f534",
+      "text": "# Pins and Pages\nA pin whose label holds a wiki link opens that page in the next column when clicked; shift-click keeps the lineup. In a file, a `title` or `page` property names the wiki page, `name` or `label` the words, and `url` or `wiki_url` an outside link."
+    },
+    {
+      "type": "markdown",
+      "id": "5bc00a06485846dd",
+      "text": "# A List of the Same Pins\nBeneath the globe the same pins are listed as ordinary text and links, for a screen reader, a keyboard, or a machine with no WebGL. The button beside each turns the globe to it. The globe does not spin or pulse for a reader who asks for reduced motion."
+    },
+    {
+      "type": "markdown",
+      "id": "579c2b442cee1621",
+      "text": "# Freezing Into a Map Item\nA Globe item is a marker source, like a Map item. Put a Map item holding the one word PAGE on the same page and it draws the globe's pins; its snowflake freezes them into the page. That is how the points of a file become pins a person can look after."
+    },
+    {
+      "type": "markdown",
+      "id": "356e8e6734e765a0",
+      "text": "# Two Halves\nThe item on the page is a thin shell: it reads the text, gathers pins and keeps the list. The globe is drawn by `globe.html` in a sandboxed frame, and the two talk only by messages. The same `globe.html` opened in a plain Frame item reads Map items by itself, so a page still draws on a farm without this plugin."
+    },
+    {
+      "type": "markdown",
+      "id": "3fcc0137de9657ff",
+      "text": "# See"
+    },
+    {
+      "type": "markdown",
+      "id": "62503c08db98dfa9",
+      "text": "- [https://place.fish/view/globe-plugin Globe Plugin] \u2014 the research \u00b7 [https://place.fish/view/globe-plugin-plan Globe Plugin Plan] \u2014 the phases\n- [[About Map Plugin]] \u00b7 [[About Frame Plugin]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "About Globe Plugin",
+        "story": [
+          {
+            "type": "markdown",
+            "id": "93e26dbbd5e5c626",
+            "text": "The Globe plugin draws a globe from pins the wiki already holds \u2014 the pins of Map items, the points of a GeoJSON file, and pins typed into the item itself. Whatever it shows it offers back to the page, so a Map item can gather and freeze it. The globe and its libraries ship inside the plugin, so it draws with no network."
+          },
+          {
+            "type": "globe",
+            "id": "ea14d6e4c4603334",
+            "text": "LAYER Two Cities\n51.5074, -0.1278 London\n52.52, 13.405 Berlin\nTwo pins typed into the item. Double-click this caption to edit."
+          },
+          {
+            "type": "markdown",
+            "id": "103489f37ac838c7",
+            "text": "# Item Text\nA command is an UPPERCASE first word, as in the Map plugin. Any other line is a caption."
+          },
+          {
+            "type": "table",
+            "id": "c1ffb4d41fd07ed9",
+            "text": "CAPTION What a Globe item understands\n\n| Line | Does |\n|---|---|\n| PAGE | Gathers the pins of the other Map and Globe items on this page |\n| LINEUP | Gathers the pins of every such item to the left in the lineup |\n| SOURCE /assets/page-slug/file.geojson | Draws the points of a GeoJSON file; a path beginning / is read from the site the page came from |\n| 51.5, -0.1 Label with a [[Link]] | A pin typed here, spelled exactly as the Map plugin spells it |\n| LAYER Name | Names and colours the lines that follow, until the next LAYER |"
+          },
+          {
+            "type": "markdown",
+            "id": "40737118b4de8f5e",
+            "text": "KIND, TEXTURE and VIEW are planned. The item recognises them, draws nothing for them, and says so beneath the globe. A mistyped command is reported the same way, with a suggestion."
+          },
+          {
+            "type": "markdown",
+            "id": "7359e7da8566abca",
+            "text": "# Points Only\nVersion 0.1 draws points. Lines and areas in a file are counted and left out, and the item says how many."
+          },
+          {
+            "type": "markdown",
+            "id": "58c4a01eb214f534",
+            "text": "# Pins and Pages\nA pin whose label holds a wiki link opens that page in the next column when clicked; shift-click keeps the lineup. In a file, a `title` or `page` property names the wiki page, `name` or `label` the words, and `url` or `wiki_url` an outside link."
+          },
+          {
+            "type": "markdown",
+            "id": "5bc00a06485846dd",
+            "text": "# A List of the Same Pins\nBeneath the globe the same pins are listed as ordinary text and links, for a screen reader, a keyboard, or a machine with no WebGL. The button beside each turns the globe to it. The globe does not spin or pulse for a reader who asks for reduced motion."
+          },
+          {
+            "type": "markdown",
+            "id": "579c2b442cee1621",
+            "text": "# Freezing Into a Map Item\nA Globe item is a marker source, like a Map item. Put a Map item holding the one word PAGE on the same page and it draws the globe's pins; its snowflake freezes them into the page. That is how the points of a file become pins a person can look after."
+          },
+          {
+            "type": "markdown",
+            "id": "356e8e6734e765a0",
+            "text": "# Two Halves\nThe item on the page is a thin shell: it reads the text, gathers pins and keeps the list. The globe is drawn by `globe.html` in a sandboxed frame, and the two talk only by messages. The same `globe.html` opened in a plain Frame item reads Map items by itself, so a page still draws on a farm without this plugin."
+          },
+          {
+            "type": "markdown",
+            "id": "3fcc0137de9657ff",
+            "text": "# See"
+          },
+          {
+            "type": "markdown",
+            "id": "62503c08db98dfa9",
+            "text": "- [https://place.fish/view/globe-plugin Globe Plugin] \u2014 the research \u00b7 [https://place.fish/view/globe-plugin-plan Globe Plugin Plan] \u2014 the phases\n- [[About Map Plugin]] \u00b7 [[About Frame Plugin]]"
+          }
+        ]
+      },
+      "date": 1790005409869,
+      "provenance": "Generated through a dialogue between David Bovill and Claude Code (claude-fable-5-1), session 2026-09-21, via the [[fedwiki-create-plugin]] skill."
+    }
+  ],
+  "plugin": "globe"
+}

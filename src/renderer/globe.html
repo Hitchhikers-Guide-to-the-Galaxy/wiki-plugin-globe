@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Globe</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #fff; overflow: hidden;
+      font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color: #222; }
+    #globe { position: absolute; inset: 0; }
+    .panel { position: absolute; background: rgba(255,255,255,.92); border: 1px solid #ddd; border-radius: 6px;
+      padding: 6px 9px; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-size: 12px; }
+    #status { top: 8px; left: 8px; max-width: 70%; }
+    #legend { bottom: 8px; left: 8px; max-width: 70%; display: none; }
+    #legend span { display: inline-block; margin-right: 10px; white-space: nowrap; }
+    #legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+    .card { background: rgba(255,255,255,.96); border: 1px solid #ccc; border-radius: 6px; padding: 5px 8px;
+      font-size: 12px; max-width: 240px; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+  </style>
+  <!-- Everything the globe needs ships beside this file, so it draws with no network at all. -->
+  <script src="globe.gl.min.js"></script>
+  <script src="topojson-client.min.js"></script>
+  <script src="land-110m.js"></script>
+</head>
+<body>
+  <div id="globe" aria-hidden="true"></div>
+  <div id="status" class="panel"><b>Globe</b> <span id="count">waiting for pins…</span></div>
+  <div id="legend" class="panel"></div>
+  <script>
+  // One renderer, two ways in.
+  //   #shell — the Globe plugin's shell owns the data and sends it: globePoints in, globeReady / globeOpen out.
+  //   otherwise — a plain Frame item: ask the Frame plugin for the marker-sources to the left, or read ?data=<geojson>.
+  // A page written for the plugin therefore still draws on a farm that has only the Frame plugin.
+  (function () {
+    const q = new URLSearchParams(location.search);
+    const framed = window.parent !== window;
+    const shell = framed && location.hash === '#shell';
+    const still = q.has('still') || matchMedia('(prefers-reduced-motion: reduce)').matches;   // ?still=1 asks for the same by hand
+    const COLOURS = ['#c2410c', '#1d4ed8', '#15803d', '#7e22ce', '#b45309', '#0e7490'];
+    const count = document.getElementById('count');
+    const legend = document.getElementById('legend');
+    const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    const readLabel = html => {
+      const d = new DOMParser().parseFromString(html || '', 'text/html');
+      const a = d.querySelector('a.internal');
+      return { text: d.body.textContent.trim(), title: a ? a.textContent : null };
+    };
+
+    let shown = [];
+    const open = (p, event) => {
+      const shift = !!(event && event.shiftKey);
+      if (shell) return window.parent.postMessage({ action: 'globeOpen', index: shown.indexOf(p), shift }, '*');
+      if (!p.title) return;
+      if (framed) window.parent.postMessage({ action: 'doInternalLink', title: p.title, keepLineup: shift }, '*');
+      else window.open('/view/' + p.title.replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/g, '').toLowerCase());
+    };
+
+    const world = Globe()(document.getElementById('globe'))
+      .backgroundColor('#ffffff')
+      .showAtmosphere(true).atmosphereColor('#9ec5e8')
+      .pointLat('lat').pointLng('lon').pointColor('colour')
+      .pointAltitude(0.02).pointRadius(0.55).pointsTransitionDuration(still ? 0 : 600)
+      .pointLabel(p => `<div class="card"><b>${esc(p.text || 'pin')}</b><br>${p.lat.toFixed(3)}, ${p.lon.toFixed(3)}`
+        + `${p.layer ? `<br>${esc(p.layer)}` : ''}${p.from ? `<br><i>${esc(p.from)}</i>` : ''}</div>`)
+      .onPointClick(open)
+      .onPointHover(p => { document.body.style.cursor = p && (p.title || p.href) ? 'pointer' : ''; })
+      .ringLat('lat').ringLng('lon').ringColor(() => t => `rgba(194,65,12,${1 - t})`)
+      .ringMaxRadius(3).ringPropagationSpeed(1.2).ringRepeatPeriod(1400);
+    world.globeMaterial().color.set('#cfe3f1');   // pale ocean; no texture to fetch
+    world.globeMaterial().emissive.set('#cfe3f1'); world.globeMaterial().emissiveIntensity = 0.35;
+    world.controls().autoRotate = !still;
+    world.controls().autoRotateSpeed = 0.25;
+    addEventListener('pointerdown', () => { world.controls().autoRotate = false; }, { once: true });
+    addEventListener('resize', () => world.width(innerWidth).height(innerHeight));
+
+    // land backdrop, so points do not float in an empty ocean
+    world.polygonsData(topojson.feature(LAND_110M, LAND_110M.objects.land).features)
+      .polygonCapColor(() => '#e7e2d6').polygonSideColor(() => '#d6cfbf')
+      .polygonStrokeColor(() => '#b9b09c').polygonAltitude(0.005);
+
+    const fly = (lat, lng, altitude) => world.pointOfView({ lat, lng, altitude }, still ? 0 : 800);
+
+    let drawn = '';
+    const draw = (points, how) => {
+      const sig = JSON.stringify(points.map(p => [p.lat, p.lon, p.text, p.colour]));
+      if (sig === drawn) return;   // repeated sends must not re-fly the camera
+      drawn = sig;
+      shown = points;
+      world.pointsData(points).ringsData(still ? [] : points);
+      count.textContent = `${points.length} pin${points.length === 1 ? '' : 's'}${how ? ' — ' + how : ''}`;
+      const layers = [...new Map(points.filter(p => p.layer).map(p => [p.layer, p.colour])).entries()];
+      legend.style.display = layers.length > 1 ? 'block' : 'none';
+      legend.innerHTML = layers.map(([name, colour]) => `<span><i style="background:${esc(colour)}"></i>${esc(name)}</span>`).join('');
+      if (!points.length) return;
+      const lats = points.map(p => p.lat), lons = points.map(p => p.lon);
+      const span = Math.max(Math.max(...lats) - Math.min(...lats), Math.max(...lons) - Math.min(...lons));
+      // Look from as close as the spread allows, and size the pins to that height: big enough to click, small enough not to pile up.
+      const altitude = Math.min(2.5, Math.max(0.35, span / 20));
+      const radius = Math.min(0.6, altitude * 0.45);
+      world.pointRadius(radius).ringMaxRadius(radius * 6);
+      fly(lats.reduce((s, v) => s + v, 0) / lats.length, lons.reduce((s, v) => s + v, 0) / lons.length, altitude);
+    };
+
+    if (shell) {
+      addEventListener('message', ({ data, source }) => {
+        if (source !== window.parent || !data) return;
+        if (data.action === 'globeHello') window.parent.postMessage({ action: 'globeReady' }, '*');   // the shell may start listening after this frame has loaded
+        else if (data.action === 'globePoints' && Array.isArray(data.points)) draw(data.points, '');
+        else if (data.action === 'globeFly') { world.controls().autoRotate = false; fly(+data.lat, +data.lon, 0.25); }
+      });
+      window.parent.postMessage({ action: 'globeReady' }, '*');
+      return;
+    }
+
+    const fromGeojson = async url => {
+      const fc = await fetch(url).then(r => r.json());
+      return fc.features.filter(f => f.geometry && f.geometry.type === 'Point').map(f => ({
+        lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0],
+        text: f.properties.name || f.properties.label || '', title: f.properties.title || null,
+        from: url.split('/').pop(), colour: COLOURS[0],
+      }));
+    };
+
+    let answered = false;
+    addEventListener('message', async ({ data }) => {
+      if (!data || data.action !== 'sourceData' || data.topic !== 'marker') return;
+      answered = true;
+      const sources = Array.isArray(data.sources) ? data.sources : [];   // the error case is an Object
+      const points = [];
+      // nearest-first from the Frame plugin; read farthest-first so an aggregating map's repeats lose to the originals
+      [...sources].reverse().forEach((s, i) => (s.markerData || []).forEach(m => {
+        const { text, title } = readLabel(m.label);
+        points.push({ lat: m.lat, lon: m.lon, text, title, colour: COLOURS[i % COLOURS.length], from: `map item ${i + 1}` });
+      }));
+      const seen = new Set();
+      const unique = points.filter(p => { const k = `${p.lat.toFixed(5)},${p.lon.toFixed(5)}`; return seen.has(k) ? false : seen.add(k); });
+      if (unique.length) draw(unique, `read live from ${sources.length} Map item${sources.length > 1 ? 's' : ''}`);
+      else if (q.get('data')) draw(await fromGeojson(q.get('data')), 'no Map items found; read from the GeoJSON file');
+      else count.textContent = 'no Map items to the left of this frame';
+    });
+
+    // Map items draw asynchronously (Leaflet loads first), so ask more than once.
+    if (framed) {
+      let tries = 0;
+      const ask = () => { if (tries++ < 6) { window.parent.postMessage({ action: 'requestSourceData', topic: 'marker' }, '*'); setTimeout(ask, 1500); } };
+      ask();
+    }
+    setTimeout(async () => {
+      if (!answered && q.get('data')) draw(await fromGeojson(q.get('data')), 'read from the GeoJSON file');
+    }, framed ? 4000 : 0);
+  })();
+  </script>
+</body>
+</html>

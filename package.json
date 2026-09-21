@@ -1,0 +1,44 @@
+{
+  "name": "wiki-plugin-globe",
+  "version": "0.1.0",
+  "description": "Federated Wiki plugin — draws a globe.gl globe from the pins in Map items, GeoJSON files and pins typed into the item, and offers them back as markerData so a Map item can freeze them",
+  "type": "module",
+  "main": "client/globe.js",
+  "files": [
+    "client",
+    "pages",
+    "factory.json"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "@fortyfoxes/wiki-dsl": "file:../wiki-dsl",
+    "esbuild": "^0.25.12",
+    "globe.gl": "^2.46.2",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2"
+  },
+  "keywords": [
+    "federated-wiki",
+    "fedwiki",
+    "wiki-plugin",
+    "globe",
+    "geojson",
+    "map"
+  ],
+  "author": "David Bovill",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hitchhikers-Guide-to-the-Galaxy/wiki-plugin-globe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Hitchhikers-Guide-to-the-Galaxy/wiki-plugin-globe/issues"
+  },
+  "homepage": "https://github.com/Hitchhikers-Guide-to-the-Galaxy/wiki-plugin-globe#readme",
+  "engines": {
+    "node": ">=18"
+  }
+}
