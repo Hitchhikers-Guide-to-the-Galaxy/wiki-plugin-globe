@@ -19,22 +19,27 @@
     {
       "type": "table",
       "id": "c1ffb4d41fd07ed9",
-      "text": "CAPTION What a Globe item understands\n\n| Line | Does |\n|---|---|\n| PAGE | Gathers the pins of the other Map and Globe items on this page |\n| LINEUP | Gathers the pins of every such item to the left in the lineup |\n| SOURCE /assets/page-slug/file.geojson | Draws the points of a GeoJSON file; a path beginning / is read from the site the page came from |\n| 51.5, -0.1 Label with a [[Link]] | A pin typed here, spelled exactly as the Map plugin spells it |\n| LAYER Name | Names and colours the lines that follow, until the next LAYER |"
+      "text": "CAPTION What a Globe item understands\n\n| Line | Does |\n|---|---|\n| PAGE | Gathers the pins of the other Map and Globe items on this page |\n| LINEUP | Gathers the pins of every such item to the left in the lineup |\n| SOURCE /assets/page-slug/file.geojson | Draws the points of a GeoJSON file; a path beginning / is read from the site the page came from |\n| 51.5, -0.1 Label with a [[Link]] | A pin typed here, spelled exactly as the Map plugin spells it |\n| LAYER Name | Names and colours the lines that follow, until the next LAYER |\n| VIEW 51.5, -0.1, 0.4 | Where the globe is looked at from \u2014 latitude, longitude, altitude \u2014 and it stays there |\n| SHOW Name | The one layer shown; the others wait in the legend |"
     },
     {
       "type": "markdown",
       "id": "40737118b4de8f5e",
-      "text": "KIND, TEXTURE and VIEW are planned. The item recognises them, draws nothing for them, and says so beneath the globe. A mistyped command is reported the same way, with a suggestion."
+      "text": "KIND and TEXTURE are planned. The item recognises them, draws nothing for them, and says so beneath the globe. A mistyped command is reported the same way, with a suggestion."
     },
     {
       "type": "markdown",
       "id": "7359e7da8566abca",
-      "text": "# Points Only\nVersion 0.1 draws points. Lines and areas in a file are counted and left out, and the item says how many."
+      "text": "# Points Only\nVersion 0.2 draws points. Lines and areas in a file are counted and left out, and the item says how many."
     },
     {
       "type": "markdown",
       "id": "58c4a01eb214f534",
       "text": "# Pins and Pages\nA pin whose label holds a wiki link opens that page in the next column when clicked; shift-click keeps the lineup. In a file, a `title` or `page` property names the wiki page, `name` or `label` the words, and `url` or `wiki_url` an outside link."
+    },
+    {
+      "type": "markdown",
+      "id": "25056e5765871460",
+      "text": "# Saving the View\nTurn and zoom the globe, click a layer in the legend to show it alone, then press the \u2316 button: the item gets a VIEW line for the camera and a SHOW line for the layer, and opens that way for everyone after. Both are ordinary lines of text and can be typed or edited by hand."
     },
     {
       "type": "markdown",
@@ -44,7 +49,7 @@
     {
       "type": "markdown",
       "id": "579c2b442cee1621",
-      "text": "# Freezing Into a Map Item\nA Globe item is a marker source, like a Map item. Put a Map item holding the one word PAGE on the same page and it draws the globe's pins; its snowflake freezes them into the page. That is how the points of a file become pins a person can look after."
+      "text": "# Freezing\nThe snowflake beneath the globe freezes what it shows into the page, in the same `frozen` shape the Map plugin uses: latitude, longitude and label, plus the layer name. A frozen globe gathers nothing and reads no file \u2014 it draws the pins the page holds, so it survives a fork to a site that has no file. Shift-click the snowflake to thaw. A Globe item is also a marker source, so a Map item holding PAGE can gather and freeze the globe's pins for itself."
     },
     {
       "type": "markdown",
@@ -132,6 +137,57 @@
       },
       "date": 1790005409869,
       "provenance": "Generated through a dialogue between David Bovill and Claude Code (claude-fable-5-1), session 2026-09-21, via the [[fedwiki-create-plugin]] skill."
+    },
+    {
+      "type": "edit",
+      "id": "c1ffb4d41fd07ed9",
+      "item": {
+        "type": "table",
+        "id": "c1ffb4d41fd07ed9",
+        "text": "CAPTION What a Globe item understands\n\n| Line | Does |\n|---|---|\n| PAGE | Gathers the pins of the other Map and Globe items on this page |\n| LINEUP | Gathers the pins of every such item to the left in the lineup |\n| SOURCE /assets/page-slug/file.geojson | Draws the points of a GeoJSON file; a path beginning / is read from the site the page came from |\n| 51.5, -0.1 Label with a [[Link]] | A pin typed here, spelled exactly as the Map plugin spells it |\n| LAYER Name | Names and colours the lines that follow, until the next LAYER |\n| VIEW 51.5, -0.1, 0.4 | Where the globe is looked at from \u2014 latitude, longitude, altitude \u2014 and it stays there |\n| SHOW Name | The one layer shown; the others wait in the legend |"
+      },
+      "date": 1790033967658
+    },
+    {
+      "type": "edit",
+      "id": "40737118b4de8f5e",
+      "item": {
+        "type": "markdown",
+        "id": "40737118b4de8f5e",
+        "text": "KIND and TEXTURE are planned. The item recognises them, draws nothing for them, and says so beneath the globe. A mistyped command is reported the same way, with a suggestion."
+      },
+      "date": 1790033967658
+    },
+    {
+      "type": "add",
+      "id": "25056e5765871460",
+      "item": {
+        "type": "markdown",
+        "id": "25056e5765871460",
+        "text": "# Saving the View\nTurn and zoom the globe, click a layer in the legend to show it alone, then press the \u2316 button: the item gets a VIEW line for the camera and a SHOW line for the layer, and opens that way for everyone after. Both are ordinary lines of text and can be typed or edited by hand."
+      },
+      "after": "58c4a01eb214f534",
+      "date": 1790033967658
+    },
+    {
+      "type": "edit",
+      "id": "7359e7da8566abca",
+      "item": {
+        "type": "markdown",
+        "id": "7359e7da8566abca",
+        "text": "# Points Only\nVersion 0.2 draws points. Lines and areas in a file are counted and left out, and the item says how many."
+      },
+      "date": 1790033979591
+    },
+    {
+      "type": "edit",
+      "id": "579c2b442cee1621",
+      "item": {
+        "type": "markdown",
+        "id": "579c2b442cee1621",
+        "text": "# Freezing\nThe snowflake beneath the globe freezes what it shows into the page, in the same `frozen` shape the Map plugin uses: latitude, longitude and label, plus the layer name. A frozen globe gathers nothing and reads no file \u2014 it draws the pins the page holds, so it survives a fork to a site that has no file. Shift-click the snowflake to thaw. A Globe item is also a marker source, so a Map item holding PAGE can gather and freeze the globe's pins for itself."
+      },
+      "date": 1790033979591
     }
   ],
   "plugin": "globe"

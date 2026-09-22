@@ -1,6 +1,6 @@
 {
   "name": "wiki-plugin-globe",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Federated Wiki plugin — draws a globe.gl globe from the pins in Map items, GeoJSON files and pins typed into the item, and offers them back as markerData so a Map item can freeze them",
   "type": "module",
   "main": "client/globe.js",

@@ -12,7 +12,8 @@
       padding: 6px 9px; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-size: 12px; }
     #status { top: 8px; left: 8px; max-width: 70%; }
     #legend { bottom: 8px; left: 8px; max-width: 70%; display: none; }
-    #legend span { display: inline-block; margin-right: 10px; white-space: nowrap; }
+    #legend span { display: inline-block; margin-right: 10px; white-space: nowrap; cursor: pointer; opacity: .45; }
+    #legend span.on { opacity: 1; }
     #legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
     .card { background: rgba(255,255,255,.96); border: 1px solid #ccc; border-radius: 6px; padding: 5px 8px;
       font-size: 12px; max-width: 240px; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
@@ -82,31 +83,75 @@
     const fly = (lat, lng, altitude) => world.pointOfView({ lat, lng, altitude }, still ? 0 : 800);
 
     let drawn = '';
-    const draw = (points, how) => {
-      const sig = JSON.stringify(points.map(p => [p.lat, p.lon, p.text, p.colour]));
-      if (sig === drawn) return;   // repeated sends must not re-fly the camera
-      drawn = sig;
+    let all = [];        // every point sent, whatever the legend hides
+    let chosen = null;   // the one layer shown, or null for all
+    const tellShell = message => shell && window.parent.postMessage(message, '*');
+
+    const place = points => {
       shown = points;
       world.pointsData(points).ringsData(still ? [] : points);
-      count.textContent = `${points.length} pin${points.length === 1 ? '' : 's'}${how ? ' — ' + how : ''}`;
-      const layers = [...new Map(points.filter(p => p.layer).map(p => [p.layer, p.colour])).entries()];
-      legend.style.display = layers.length > 1 ? 'block' : 'none';
-      legend.innerHTML = layers.map(([name, colour]) => `<span><i style="background:${esc(colour)}"></i>${esc(name)}</span>`).join('');
-      if (!points.length) return;
+      if (!points.length) return null;
       const lats = points.map(p => p.lat), lons = points.map(p => p.lon);
       const span = Math.max(Math.max(...lats) - Math.min(...lats), Math.max(...lons) - Math.min(...lons));
       // Look from as close as the spread allows, and size the pins to that height: big enough to click, small enough not to pile up.
       const altitude = Math.min(2.5, Math.max(0.35, span / 20));
       const radius = Math.min(0.6, altitude * 0.45);
       world.pointRadius(radius).ringMaxRadius(radius * 6);
-      fly(lats.reduce((s, v) => s + v, 0) / lats.length, lons.reduce((s, v) => s + v, 0) / lons.length, altitude);
+      return { lat: lats.reduce((s, v) => s + v, 0) / lats.length, lng: lons.reduce((s, v) => s + v, 0) / lons.length, altitude };
     };
+
+    const choose = (layer, fly) => {
+      chosen = layer;
+      [...legend.children].forEach(el => el.classList.toggle('on', !chosen || el.dataset.layer === chosen));
+      const points = chosen ? all.filter(p => p.layer === chosen) : all;
+      const fit = place(points);
+      count.textContent = `${points.length} pin${points.length === 1 ? '' : 's'}${chosen ? ' — ' + esc(chosen) : ''}`;
+      if (fly && fit) { world.pointRadius(Math.min(0.6, fit.altitude * 0.45)); fly(fit.lat, fit.lng, fit.altitude); }
+    };
+
+    const draw = (points, how, view, show) => {
+      const sig = JSON.stringify([points.map(p => [p.lat, p.lon, p.text, p.colour]), view, show]);
+      if (sig === drawn) return;   // repeated sends must not re-fly the camera
+      drawn = sig;
+      all = points;
+      const layers = [...new Map(points.filter(p => p.layer).map(p => [p.layer, p.colour])).entries()];
+      legend.style.display = layers.length > 1 ? 'block' : 'none';
+      legend.innerHTML = layers.map(([name, colour]) => `<span data-layer="${esc(name)}"><i style="background:${esc(colour)}"></i>${esc(name)}</span>`).join('');
+      [...legend.children].forEach(el => el.addEventListener('click', () => {
+        const next = chosen === el.dataset.layer ? null : el.dataset.layer;   // click the shown layer again to show all
+        choose(next, fly);
+        tellShell({ action: 'globeShow', layer: next });
+      }));
+      const wanted = show && layers.some(([name]) => name === show) ? show : null;
+      chosen = null;
+      choose(wanted, null);
+      const fit = place(shown);
+      count.textContent = `${shown.length} pin${shown.length === 1 ? '' : 's'}${how ? ' — ' + how : chosen ? ' — ' + esc(chosen) : ''}`;
+      if (view) {   // a saved view is where the author wanted the globe left: go there and stay
+        world.controls().autoRotate = false;
+        world.pointRadius(Math.min(0.6, Math.max(0.05, view.altitude) * 0.45));
+        fly(view.lat, view.lon, view.altitude);
+        return;
+      }
+      if (fit) fly(fit.lat, fit.lng, fit.altitude);
+    };
+
+    // Tell the shell where the globe is looked at from, once the hand that moved it is still.
+    let viewTimer = null;
+    world.controls().addEventListener('change', () => {
+      if (!shell) return;
+      clearTimeout(viewTimer);
+      viewTimer = setTimeout(() => {
+        const { lat, lng, altitude } = world.pointOfView();
+        tellShell({ action: 'globeView', lat, lon: lng, altitude });
+      }, 250);
+    });
 
     if (shell) {
       addEventListener('message', ({ data, source }) => {
         if (source !== window.parent || !data) return;
         if (data.action === 'globeHello') window.parent.postMessage({ action: 'globeReady' }, '*');   // the shell may start listening after this frame has loaded
-        else if (data.action === 'globePoints' && Array.isArray(data.points)) draw(data.points, '');
+        else if (data.action === 'globePoints' && Array.isArray(data.points)) draw(data.points, '', data.view || null, data.show || null);
         else if (data.action === 'globeFly') { world.controls().autoRotate = false; fly(+data.lat, +data.lon, 0.25); }
       });
       window.parent.postMessage({ action: 'globeReady' }, '*');

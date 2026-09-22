@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parse, pin, resolveSource, pinsFromGeojson, geojsonFromMarkers, unique } from '../src/client/parse.js'
+import { parse, pin, resolveSource, pinsFromGeojson, geojsonFromMarkers, unique, withLine } from '../src/client/parse.js'
 
 test('pin lines are the Map plugin\'s', () => {
   assert.deepEqual(pin('51.5, -0.1 London [[Embassy]]'), { lat: 51.5, lon: -0.1, label: 'London [[Embassy]]' })
@@ -28,6 +28,7 @@ test('lines before any LAYER form an unnamed layer', () => {
 test('planned commands are named, not reported; typos are reported, not captioned', () => {
   const got = parse('KIND points\nSORCE /assets/a.geojson\nlowercase page is a caption')
   assert.deepEqual(got.planned, ['KIND'])
+  assert.equal(got.view, null)
   assert.deepEqual(got.problems, [{ word: 'SORCE', suggestion: 'SOURCE' }])
   assert.deepEqual(got.captions, ['lowercase page is a caption'])
 })
@@ -62,4 +63,21 @@ test('markerGeo is valid GeoJSON: properties beside geometry', () => {
 
 test('unique keeps the first of a repeated pin', () => {
   assert.equal(unique([{ lat: 1, lon: 2, label: 'a' }, { lat: 1.000001, lon: 2, label: 'a' }, { lat: 1, lon: 2, label: 'b' }]).length, 2)
+})
+
+test('VIEW and SHOW', () => {
+  const got = parse('PAGE\nVIEW 51.5, -0.1, 0.4\nSHOW Embassies')
+  assert.deepEqual(got.view, { lat: 51.5, lon: -0.1, altitude: 0.4 })
+  assert.equal(got.show, 'Embassies')
+  assert.deepEqual(parse('VIEW 52, 13').view, { lat: 52, lon: 13, altitude: 1 })
+  assert.equal(parse('VIEW nowhere').view, null)
+  assert.equal(parse('VIEW 51.5, -0.1').layers.length, 0, 'a VIEW line is not a pin')
+})
+
+test('withLine sets, replaces, removes and places a command line', () => {
+  assert.equal(withLine('PAGE\nA caption.', 'VIEW', '1, 2, 0.5'), 'PAGE\nVIEW 1, 2, 0.5\nA caption.')
+  assert.equal(withLine('PAGE\nVIEW 9, 9\nA caption.', 'VIEW', '1, 2, 0.5'), 'PAGE\nVIEW 1, 2, 0.5\nA caption.')
+  assert.equal(withLine('PAGE\nVIEW 9, 9\nA caption.', 'VIEW', null), 'PAGE\nA caption.')
+  assert.equal(withLine('51.5, -0.1 London\nCaption', 'SHOW', 'Cities'), '51.5, -0.1 London\nSHOW Cities\nCaption')
+  assert.equal(withLine('', 'VIEW', '1, 2'), 'VIEW 1, 2\n')
 })

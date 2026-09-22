@@ -10,6 +10,8 @@ gather and freeze it.
     LAYER Places
     SOURCE /assets/my-page/places.geojson
     51.5, -0.1 A pin typed here, with a [[Link]]
+    VIEW 51.5, -0.1, 0.4
+    SHOW Places
     Any other line is a caption.
 
 - **Two halves.** `client/globe.js` is the shell on the wiki page; `client/globe.html`
@@ -20,8 +22,11 @@ gather and freeze it.
 - **Degrades.** `globe.html` in a plain Frame item reads Map items through the Frame
   plugin's `requestSourceData`, with `?data=<geojson>` as a fallback.
 - **Accessible.** The same pins are listed beneath the globe; reduced motion is respected.
+- **Freezes.** The snowflake writes the pins into the item as `frozen` — the Map plugin's shape,
+  plus a `layer` name — so a frozen globe draws with no file and no neighbours, and survives a
+  fork. Shift-click thaws. The ⌖ button saves the camera (`VIEW`) and the chosen layer (`SHOW`).
 
-Version 0.1 draws points only. Research and plan: <https://place.fish/view/globe-plugin>,
+Version 0.2 draws points only. Research and plan: <https://place.fish/view/globe-plugin>,
 <https://place.fish/view/globe-plugin-plan>.
 
     npm install && npm test && npm run build
