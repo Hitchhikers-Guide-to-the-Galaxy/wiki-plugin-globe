@@ -15,7 +15,11 @@
     #legend span { display: inline-block; margin-right: 10px; white-space: nowrap; cursor: pointer; opacity: .45; }
     #legend span.on { opacity: 1; }
     #legend i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
-    .card { background: rgba(255,255,255,.96); border: 1px solid #ccc; border-radius: 6px; padding: 5px 8px;
+    /* globe.gl wraps the hover label in .float-tooltip-kap with its own dark-theme colours (#eee on
+       translucent black); on this white globe that left the card's text white on white. Clear its
+       box and set the card's own colour. */
+    .float-tooltip-kap { background: none !important; padding: 0 !important; color: #222 !important; }
+    .card { background: rgba(255,255,255,.96); color: #222; border: 1px solid #ccc; border-radius: 6px; padding: 5px 8px;
       font-size: 12px; max-width: 240px; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
   </style>
   <!-- Everything the globe needs ships beside this file, so it draws with no network at all. -->
